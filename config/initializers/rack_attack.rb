@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+return if ENV["RAILS_WEB"]
 require 'doorkeeper/grape/authorization_decorator'
 
 class Rack::Attack

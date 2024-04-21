@@ -4,34 +4,35 @@ source 'https://rubygems.org'
 ruby '>= 3.0.0'
 
 gem 'puma', '~> 6.3'
-gem 'rails', '~> 7.1.1'
-gem 'propshaft'
+gem 'rails', '~> 7.1.1', group: [:default, :web]
+gem 'propshaft', group: [:default, :web]
 gem 'thor', '~> 1.2'
 gem 'rack', '~> 2.2.7'
+gem 'rails-html-sanitizer', '~> 1.6'
 
 # For why irb is in the Gemfile, see: https://ruby.social/@st0012/111444685161478182
 gem 'irb', '~> 1.8'
 
-gem 'haml-rails', '~>2.0'
+gem 'haml-rails', '~>2.0', group: [:default, :web]
 gem 'pg', '~> 1.5'
 gem 'pghero'
-gem 'dotenv-rails', '~> 2.8'
+gem 'dotenv-rails', '~> 2.8', group: [:default, :web]
 
 gem 'aws-sdk-s3', '~> 1.123', require: false
 gem 'fog-core', '<= 2.4.0'
 gem 'fog-openstack', '~> 1.0', require: false
-gem 'kt-paperclip', '~> 7.2'
+gem 'kt-paperclip', '~> 7.2', group: [:default, :web]
 gem 'md-paperclip-azure', '~> 2.2', require: false
 gem 'blurhash', '~> 0.1'
 
-gem 'active_model_serializers', '~> 0.10'
-gem 'addressable', '~> 2.8'
+gem 'active_model_serializers', '~> 0.10', group: [:default, :web]
+gem 'addressable', '~> 2.8', group: [:default, :web]
 gem 'bootsnap', '~> 1.18.0', require: false
 gem 'browser'
-gem 'charlock_holmes', '~> 0.7.7'
+# gem 'charlock_holmes', '~> 0.7.7'
 gem 'chewy', '~> 7.3'
-gem 'devise', '~> 4.9'
-gem 'devise-two-factor', '~> 4.1'
+gem 'devise', '~> 4.9', group: [:default, :web]
+gem 'devise-two-factor', '~> 4.1', group: [:default, :web]
 
 group :pam_authentication, optional: true do
   gem 'devise_pam_authenticatable2', '~> 9.2'
@@ -42,13 +43,13 @@ gem 'net-ldap', '~> 0.18'
 gem 'omniauth-cas', '~> 3.0.0.beta.1'
 gem 'omniauth-saml', '~> 2.0'
 gem 'omniauth_openid_connect', '~> 0.6.1'
-gem 'omniauth', '~> 2.0'
+gem 'omniauth', '~> 2.0', group: [:default, :web]
 gem 'omniauth-rails_csrf_protection', '~> 1.0'
 
 gem 'color_diff', '~> 0.1'
 gem 'csv', '~> 3.2'
-gem 'discard', '~> 1.2'
-gem 'doorkeeper', '~> 5.6'
+gem 'discard', '~> 1.2', group: [:default, :web]
+gem 'doorkeeper', '~> 5.6', group: [:default, :web]
 gem 'ed25519', '~> 1.3'
 gem 'fast_blank', '~> 1.0'
 gem 'fastimage'
@@ -57,48 +58,51 @@ gem 'redis-namespace', '~> 1.10'
 gem 'htmlentities', '~> 4.3'
 gem 'http', '~> 5.1'
 gem 'http_accept_language', '~> 2.1'
-gem 'httplog', '~> 1.6.2'
+gem 'httplog', '~> 1.6.2', group: [:default, :web]
 gem 'i18n', '1.14.1' # TODO: Remove version when resolved: https://github.com/glebm/i18n-tasks/issues/552 / https://github.com/ruby-i18n/i18n/pull/688
-gem 'idn-ruby', require: 'idn'
-gem 'inline_svg'
-gem 'kaminari', '~> 1.2'
+gem 'idn-ruby', require: 'idn', group: [:default, :web]
+gem 'inline_svg', group: [:default, :web]
+gem 'kaminari', '~> 1.2', group: [:default, :web]
 gem 'link_header', '~> 0.0'
-gem 'mime-types', '~> 3.5.0', require: 'mime/types/columnar'
-gem 'nokogiri', '~> 1.15'
+gem 'mime-types', '~> 3.5.0', require: 'mime/types/columnar', group: [:default, :web]
+gem 'nokogiri', github: 'kateinoigakukun/nokogiri', ref: '8e9904e5a891af43ad0c1e8eec467ecbbf55d55f', group: [:default, :web] 
+gem 'nio4r', github: 'kateinoigakukun/nio4r', ref: 'd219d9bce40435bd993b6ed6e425ae7e76b62d04'
 gem 'nsa'
-gem 'oj', '~> 3.14'
+gem 'oj', github: 'kateinoigakukun/oj', ref: 'dce0244a0ca260334b0b9dec50ac674132ccc85e', group: [:default, :web]
 gem 'ox', '~> 2.14'
 gem 'parslet'
 gem 'public_suffix', '~> 5.0'
-gem 'pundit', '~> 2.3'
+gem 'pundit', '~> 2.3', group: [:default, :web]
 gem 'premailer-rails'
-gem 'rack-attack', '~> 6.6'
-gem 'rack-cors', '~> 2.0', require: 'rack/cors'
+gem 'rack-attack', '~> 6.6', group: [:default, :web]
+gem 'rack-cors', '~> 2.0', require: 'rack/cors', group: [:default, :web]
 gem 'rails-i18n', '~> 7.0'
 gem 'redcarpet', '~> 3.6'
-gem 'redis', '~> 4.5', require: ['redis', 'redis/connection/hiredis']
-gem 'mario-redis-lock', '~> 1.2', require: 'redis_lock'
+install_if -> { ENV["RAILS_WEB"].nil? } do
+  gem 'redis', '~> 4.5', require: ['redis', 'redis/connection/hiredis']
+  gem 'mario-redis-lock', '~> 1.2', require: 'redis_lock'
+end
 gem 'rqrcode', '~> 2.2'
 gem 'ruby-progressbar', '~> 1.13'
-gem 'sanitize', '~> 6.0'
+gem 'sanitize', '~> 6.0', group: [:default, :web]
 gem 'scenic', '~> 1.7'
 gem 'sidekiq', '~> 6.5'
 gem 'sidekiq-scheduler', '~> 5.0'
 gem 'sidekiq-unique-jobs', '~> 7.1'
 gem 'sidekiq-bulk', '~> 0.2.0'
-gem 'simple-navigation', '~> 4.4'
-gem 'simple_form', '~> 5.2'
+gem 'simple-navigation', '~> 4.4', group: [:default, :web]
+gem 'simple_form', '~> 5.2', group: [:default, :web]
 gem 'stoplight', '~> 4.1'
-gem 'strong_migrations', '1.8.0'
+gem 'strong_migrations', '1.8.0', group: [:default, :web]
 gem 'tty-prompt', '~> 0.23', require: false
-gem 'twitter-text', '~> 3.1.0'
-gem 'tzinfo-data', '~> 1.2023'
-gem 'webpacker', '~> 5.4'
-gem 'webpush', github: 'ClearlyClaire/webpush', ref: 'f14a4d52e201128b1b00245d11b6de80d6cfdcd9'
+gem 'twitter-text', '~> 3.1.0', group: [:default, :web]
+gem 'tzinfo-data', '~> 1.2023', group: [:default, :web]
+gem 'webpacker', '~> 5.4', group: [:default, :web]
+gem 'webpush', github: 'ClearlyClaire/webpush', ref: 'f14a4d52e201128b1b00245d11b6de80d6cfdcd9', group: [:default, :web]
 gem 'webauthn', '~> 3.0'
 
-gem 'json-ld'
-gem 'json-ld-preloaded', '~> 3.2'
+gem 'json-ld', group: [:default, :web]
+gem 'json-ld-preloaded', '~> 3.2', group: [:default, :web]
 gem 'rdf-normalize', '~> 0.5'
 
 gem 'private_address_check', '~> 0.5'
@@ -173,12 +177,13 @@ group :development do
   gem 'i18n-tasks', '~> 1.0', require: false
 end
 
+# Generate fake data values
+gem 'faker', '~> 3.2', group: [:development, :test, :web]
+
 group :development, :test do
   # Interactive Debugging tools
   gem 'debug', '~> 1.8'
 
-  # Generate fake data values
-  gem 'faker', '~> 3.2'
 
   # Generate factory objects
   gem 'fabrication', '~> 2.30'
@@ -191,14 +196,18 @@ group :development, :test do
 
   # RSpec runner for rails
   gem 'rspec-rails', '~> 6.0'
+
+  unless RUBY_PLATFORM =~ /wasm/
+    gem 'ruby_wasm', git: 'https://github.com/ruby/ruby.wasm', ref: "576cc3f6d838b0f942e045dd88fb295347d2291c"
+  end
 end
 
 group :production do
-  gem 'lograge', '~> 0.12'
+  gem 'lograge', '~> 0.12', group: [:default, :web]
 end
 
 gem 'concurrent-ruby', require: false
-gem 'connection_pool', require: false
+gem 'connection_pool', require: false, group: [:default, :web]
 gem 'xorcist', '~> 1.1'
 gem 'cocoon', '~> 1.2'
 
@@ -208,3 +217,11 @@ gem 'rubyzip', '~> 2.3'
 gem 'hcaptcha', '~> 7.1'
 
 gem 'mail', '~> 2.8'
+
+gem 'io-console'
+gem 'stringio', '3.1.1'
+
+gem 'activerecord-nulldb-adapter', group: [:web]
+gem 'js', git: 'https://github.com/ruby/ruby.wasm',
+  ref: "0ca30636702eb7e1bb2a17b3868a458a03f045a8", # branch: katei/kaigi-staging
+  glob: 'packages/gems/js/*.gemspec', group: [:web]

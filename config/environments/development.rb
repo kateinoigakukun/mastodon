@@ -95,4 +95,4 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 end
 
-Redis.raise_deprecations = true
+Redis.raise_deprecations = true unless ENV["RAILS_WEB"]

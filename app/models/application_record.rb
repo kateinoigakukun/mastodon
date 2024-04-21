@@ -9,7 +9,7 @@ class ApplicationRecord < ActiveRecord::Base
 
   class << self
     def update_index(_type_name, *_args, &_block)
-      super if Chewy.enabled?
+      super if ENV["RAILS_WEB"].nil? && Chewy.enabled?
     end
   end
 

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+return if ENV["RAILS_WEB"]
+
 WebAuthn.configure do |config|
   # This value needs to match `window.location.origin` evaluated by
   # the User Agent during registration and authentication ceremonies.

@@ -24,7 +24,6 @@ Bundler.require(*Rails.groups)
 
 require_relative '../lib/exceptions'
 require_relative '../lib/sanitize_ext/sanitize_config'
-require_relative '../lib/redis/namespace_extensions'
 require_relative '../lib/paperclip/url_generator_extensions'
 require_relative '../lib/paperclip/attachment_extensions'
 require_relative '../lib/paperclip/lazy_thumbnail'
@@ -33,17 +32,22 @@ require_relative '../lib/paperclip/media_type_spoof_detector_extensions'
 require_relative '../lib/paperclip/transcoder'
 require_relative '../lib/paperclip/type_corrector'
 require_relative '../lib/paperclip/response_with_limit_adapter'
-require_relative '../lib/terrapin/multi_pipe_extensions'
+unless ENV["RAILS_WEB"]
+  require_relative '../lib/redis/namespace_extensions'
+  require_relative '../lib/terrapin/multi_pipe_extensions'
+end
 require_relative '../lib/mastodon/snowflake'
 require_relative '../lib/mastodon/version'
 require_relative '../lib/mastodon/rack_middleware'
 require_relative '../lib/public_file_server_middleware'
-require_relative '../lib/devise/strategies/two_factor_ldap_authenticatable'
-require_relative '../lib/devise/strategies/two_factor_pam_authenticatable'
-require_relative '../lib/chewy/settings_extensions'
-require_relative '../lib/chewy/index_extensions'
-require_relative '../lib/chewy/strategy/mastodon'
-require_relative '../lib/chewy/strategy/bypass_with_warning'
+unless ENV["RAILS_WEB"]
+  require_relative '../lib/devise/strategies/two_factor_ldap_authenticatable'
+  require_relative '../lib/devise/strategies/two_factor_pam_authenticatable'
+  require_relative '../lib/chewy/settings_extensions'
+  require_relative '../lib/chewy/index_extensions'
+  require_relative '../lib/chewy/strategy/mastodon'
+  require_relative '../lib/chewy/strategy/bypass_with_warning'
+end
 require_relative '../lib/webpacker/manifest_extensions'
 require_relative '../lib/webpacker/helper_extensions'
 require_relative '../lib/rails/engine_extensions'
@@ -56,7 +60,9 @@ Dotenv::Railtie.load
 
 Bundler.require(:pam_authentication) if ENV['PAM_ENABLED'] == 'true'
 
-require_relative '../lib/mastodon/redis_config'
+unless ENV["RAILS_WEB"]
+  require_relative '../lib/mastodon/redis_config'
+end
 
 module Mastodon
   class Application < Rails::Application

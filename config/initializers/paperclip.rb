@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+return if ENV['RAILS_WEB']
+
 Paperclip::DataUriAdapter.register
 Paperclip::ResponseWithLimitAdapter.register
 

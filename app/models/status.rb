@@ -391,7 +391,7 @@ class Status < ApplicationRecord
   end
 
   def store_uri
-    update_column(:uri, ActivityPub::TagManager.instance.uri_for(self)) if uri.nil?
+    update_column(:uri, ActivityPub::TagManager.instance.uri_for(self)) if uri.nil? && id
   end
 
   def prepare_contents
@@ -460,10 +460,12 @@ class Status < ApplicationRecord
   end
 
   def trigger_create_webhooks
+    return if ENV["RAILS_WEB"]
     TriggerWebhookWorker.perform_async('status.created', 'Status', id) if local?
   end
 
   def trigger_update_webhooks
+    return if ENV["RAILS_WEB"]
     TriggerWebhookWorker.perform_async('status.updated', 'Status', id) if local?
   end
 end

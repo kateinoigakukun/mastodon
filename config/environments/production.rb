@@ -13,6 +13,9 @@ Rails.application.configure do
   # and those relying on copy on write to perform better.
   # Rake tasks automatically ignore this option for performance.
   config.eager_load = true
+  if ENV['RAILS_WEB']
+    config.eager_load = false
+  end
 
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
@@ -41,7 +44,7 @@ Rails.application.configure do
   config.action_dispatch.trusted_proxies = ENV['TRUSTED_PROXY_IP'].split(/(?:\s*,\s*|\s+)/).map { |item| IPAddr.new(item) } if ENV['TRUSTED_PROXY_IP'].present?
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = true unless ENV['RAILS_WEB']
   config.ssl_options = {
     redirect: {
       exclude: ->(request) { request.path.start_with?('/health') || request.headers["Host"].end_with?('.onion') || request.headers["Host"].end_with?('.i2p') }
@@ -57,7 +60,7 @@ Rails.application.configure do
   config.log_tags = [:request_id]
 
   # Use a different cache store in production.
-  config.cache_store = :redis_cache_store, REDIS_CACHE_PARAMS
+  config.cache_store = :redis_cache_store, REDIS_CACHE_PARAMS unless ENV['RAILS_WEB']
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque

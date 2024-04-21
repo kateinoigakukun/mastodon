@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# return if ENV["RAILS_WEB"]
+
 module Twitter::TwitterText
   class Configuration
     def emoji_parsing_enabled

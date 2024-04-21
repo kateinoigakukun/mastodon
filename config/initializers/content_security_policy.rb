@@ -50,7 +50,7 @@ Rails.application.config.content_security_policy do |p|
   p.child_src       :self, :blob, assets_host
   p.worker_src      :self, :blob, assets_host
 
-  if Rails.env.development?
+  if Rails.env.development? && ENV["RAILS_WEB"].nil?
     webpacker_public_host = ENV.fetch('WEBPACKER_DEV_SERVER_PUBLIC', Webpacker.config.dev_server[:public])
     front_end_build_urls = %w(ws http).map { |protocol| "#{protocol}#{Webpacker.dev_server.https? ? 's' : ''}://#{webpacker_public_host}" }
 
@@ -71,6 +71,7 @@ Rails.application.config.content_security_policy_nonce_generator = ->(_request) 
 
 Rails.application.config.content_security_policy_nonce_directives = %w(style-src)
 
+return if ENV["RAILS_WEB"]
 Rails.application.reloader.to_prepare do
   PgHero::HomeController.content_security_policy do |p|
     p.script_src :self, :unsafe_inline, assets_host

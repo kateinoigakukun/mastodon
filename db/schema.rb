@@ -1385,6 +1385,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_22_161611) do
   add_foreign_key "web_settings", "users", name: "fk_11910667b2", on_delete: :cascade
   add_foreign_key "webauthn_credentials", "users"
 
+  next if ENV["RAILS_WEB"]
+
   create_view "instances", materialized: true, sql_definition: <<-SQL
       WITH domain_counts(domain, accounts_count) AS (
            SELECT accounts.domain,

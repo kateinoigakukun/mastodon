@@ -166,10 +166,12 @@ class Report < ApplicationRecord
   end
 
   def trigger_create_webhooks
+    return if ENV["RAILS_WEB"]
     TriggerWebhookWorker.perform_async('report.created', 'Report', id)
   end
 
   def trigger_update_webhooks
+    return if ENV["RAILS_WEB"]
     TriggerWebhookWorker.perform_async('report.updated', 'Report', id)
   end
 end

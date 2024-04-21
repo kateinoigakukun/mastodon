@@ -24,20 +24,28 @@ module Api::ErrorHandling
       render json: { error: 'Remote data could not be fetched' }, status: 503
     end
 
-    rescue_from OpenSSL::SSL::SSLError do
-      render json: { error: 'Remote SSL certificate could not be verified' }, status: 503
+    if defined?(OpenSSL::SSL)
+      rescue_from OpenSSL::SSL::SSLError do
+        render json: { error: 'Remote SSL certificate could not be verified' }, status: 503
+      end
     end
 
     rescue_from Mastodon::NotPermittedError do
       render json: { error: 'This action is not allowed' }, status: 403
     end
 
-    rescue_from Seahorse::Client::NetworkingError do |e|
-      Rails.logger.warn "Storage server error: #{e}"
-      render json: { error: 'There was a temporary problem serving your request, please try again' }, status: 503
+    if defined?(Seahorse)
+      rescue_from Seahorse::Client::NetworkingError do |e|
+        Rails.logger.warn "Storage server error: #{e}"
+        render json: { error: 'There was a temporary problem serving your request, please try again' }, status: 503
+      end
+      rescue_from Stoplight::Error::RedLight do
+        render json: { error: 'There was a temporary problem serving your request, please try again' }, status: 503
+      end
+
     end
 
-    rescue_from Mastodon::RaceConditionError, Stoplight::Error::RedLight do
+    rescue_from Mastodon::RaceConditionError do
       render json: { error: 'There was a temporary problem serving your request, please try again' }, status: 503
     end
 

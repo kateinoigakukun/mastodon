@@ -1,0 +1,246 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "fileutils"
+require "tempfile"
+require "json"
+require "etc"
+
+def with_env(hash)
+  old_values = {}
+  hash.each do |key, value|
+    old_values[key] = ENV[key]
+    ENV[key] = value
+    puts "#{key}=#{value}"
+  end
+  yield
+ensure
+  old_values.each do |key, value|
+    ENV[key] = value
+  end
+end
+
+def system(command)
+  puts command
+  ret = super(command)
+  raise "Command failed with status #{$?.exitstatus}" unless ret
+  ret
+end
+
+RUBYGEMS_SOURCE = "/home/katei/ghq/github.com/rubygems/rubygems"
+RUBY_WASM_ROOT = "/home/katei/ghq/github.com/ruby/ruby.wasm"
+JCO_SOURCE = "/home/katei/ghq/github.com/ruby/ruby.wasm/vendor/jco"
+WASI_SDK_PATH = ENV["WASI_SDK_PATH"] || raise("WASI_SDK_PATH environment variable is not set")
+IDN_DIR = File.join(Dir.pwd, "tmp/libidn/install")
+DEST_DIR = "tmp/standalone_web"
+RUBY_BIN = "tmp/ruby.wasm"
+
+ENV["RUBY_WASM_EXPERIMENTAL_DYNAMIC_LINKING"] = "1"
+ENV["RAILS_WEB"] = "1"
+
+system("bundle exec rbwasm build -o /dev/null --ruby-version head --dest-dir #{DEST_DIR} --disable-gems")
+
+unless File.exist?("tmp/libidn/install/usr/local/lib/libidn.a")
+  unless File.exist?("tmp/libidn")
+    system("git init tmp/gnulib")
+    system("git -C tmp/gnulib remote add origin https://git.savannah.gnu.org/git/gnulib.git || true")
+    system("git -C tmp/gnulib fetch --depth 1 origin 5b92dd0a45c8d27f13a21076b57095ea5e220870")
+    system("git -C tmp/gnulib checkout FETCH_HEAD")
+    Dir.glob("patches/gnulib/*.patch").each do |patch|
+      system("git -C tmp/gnulib am ../../#{patch}")
+    end
+  end
+
+  unless File.exist?("tmp/libidn")
+    system("git clone https://git.savannah.gnu.org/git/libidn.git tmp/libidn --branch v1.42")
+    Dir.chdir("tmp/libidn") do
+      system("GNULIB_SRCDIR=../gnulib ./bootstrap --skip-po")
+    end
+  end
+
+  puts "Building libidn"
+  FileUtils.mkdir_p("tmp/libidn/build")
+  Dir.chdir("tmp/libidn/build") do
+    system(
+      [
+        "../configure", "--host", "wasm32-wasi",
+        "--enable-cross-guesses=risky", "--disable-doc",
+        "CFLAGS='-D_WASI_EMULATED_PROCESS_CLOCKS -fPIC'", "LDFLAGS='-lwasi-emulated-process-clocks'",
+        "RANLIB=#{WASI_SDK_PATH}/bin/llvm-ranlib", "AR=#{WASI_SDK_PATH}/bin/llvm-ar", "CC=#{WASI_SDK_PATH}/bin/clang",
+      ].join(" ")
+    )
+    system("make -j#{Etc.nprocessors}")
+    system("make install DESTDIR=#{IDN_DIR}")
+  end
+end
+
+
+Bundler.with_original_env do
+  Tempfile.create do |f|
+    # temp gemrc
+    f.write(<<~GEMRC)
+    install_extension_in_lib: false
+    GEMRC
+    f.close
+
+    with_env(
+      "BUNDLE_ONLY" => "web",
+      "BUNDLE_PATH" => File.expand_path(File.join(DEST_DIR, "bundle")),
+      "BUNDLE_BUILD__JS" => "--enable-component-model",
+      "BUNDLE_BUILD__IDN___RUBY" => "--with-idn-dir=#{File.join(IDN_DIR, "usr/local")}",
+      "RUBYOPT" => "-I#{RUBYGEMS_SOURCE}/lib",
+      "GEMRC" => f.path,
+    ) do
+        system(%Q(#{RUBYGEMS_SOURCE}/bundler/exe/bundle install --target-rbconfig #{RUBY_WASM_ROOT}/rubies/ruby-head-wasm32-unknown-wasip1-pic-full/usr/local/lib/ruby/3.4.0+0/wasm32-wasi/rbconfig.rb))
+    end
+  end
+end
+
+[
+  [
+    "io-console", "0.7.2", [
+      [
+        "io/console.rb", <<~RUBY
+class IO
+  def winsize
+    [80, 24]
+  end
+
+  def wait_readable(timeout = nil)
+    false
+  end
+
+  def raw(**kwargs)
+    yield
+  end
+end
+RUBY
+      ],
+      [
+        "io/console/size.rb", ""
+      ],
+    ]
+  ],
+  ["websocket-driver", "0.7.6"],
+  ["racc", "1.7.3"],
+  ["bigdecimal", "3.1.7"],
+  ["bcrypt", "3.1.20"],
+].each do |gem_name, version, files|
+  spec = Gem::Specification.new do |s|
+    s.name = gem_name
+    s.version = version
+    s.require_paths = ["lib"]
+  end
+  specs_dir = Dir.glob(File.join(DEST_DIR, "bundle/ruby/*/specifications")).first
+  spec_path = File.join(specs_dir, "#{gem_name}-#{version}.gemspec")
+  puts "[HACK] Creating dummy gemspec #{spec_path}"
+  File.write(spec_path, spec.to_ruby)
+  if files
+    files.each do |path, contents|
+      lib_path = File.join(File.dirname(specs_dir), "gems/#{gem_name}-#{version}/lib", path)
+      puts "[HACK] Creating dummy lib #{lib_path}"
+      FileUtils.mkdir_p(File.dirname(lib_path))
+      File.write(lib_path, contents || "")
+    end
+  end
+end
+
+[
+  ["io-wait", "io/wait.rb", ""],
+  [
+    "socket", "socket.rb", <<~RUBY
+class BasicSocket
+  def initialize(...)
+    raise NotImplementedError, "Socket is not supported in WASM"
+  end
+end
+class Socket < BasicSocket
+  AF_UNSPEC = 0
+  AF_INET = 1
+end
+class IPSocket < Socket
+  def self.getaddress(...)
+    raise NotImplementedError, "Socket is not supported in WASM"
+  end
+end
+class TCPSocket < Socket; end
+    RUBY
+  ],
+].each do |lib_name, path, contents|
+  lib_path = File.join(DEST_DIR, "usr/local/lib/ruby/3.4.0+0/wasm32-wasi/#{path}")
+  FileUtils.mkdir_p(File.dirname(lib_path))
+  puts "[HACK] Creating dummy lib #{lib_path}"
+  File.write(lib_path, contents)
+end
+
+# Linking dynamic libraries
+system(
+  "bundle exec rbwasm build -o #{RUBY_BIN} --ruby-version head --dest-dir #{DEST_DIR} --disable-gems --without-stdlib enc"
+)
+
+def runruby(args)
+  FileUtils.mkdir_p("tmp/standalone_web/home/me")
+  system (%w[
+    wasmtime run
+    --env BUNDLE_ONLY=web
+    --env BUNDLE_PATH=/bundle
+    --env BUNDLE_GEMFILE=/rails/Gemfile
+    --env HOME=/home/me
+    --env RAILS_ENV=production
+    --env RAILS_WEB=1
+    --dir tmp/standalone_web/home/me::/home/me
+    --dir .::/rails
+    --dir tmp/standalone_web/usr::/usr
+    --dir tmp/standalone_web/bundle::/bundle
+  ] + [RUBY_BIN] + args.to_a).map { "'#{_1}'" }.join(" ")
+end
+
+FileUtils.mkdir_p("tmp/standalone_web/rails")
+%w[app config db lib public].each do |dir|
+  system("rsync -a #{dir}/ tmp/standalone_web/rails/#{dir}/")
+end
+FileUtils.cp("Gemfile", "tmp/standalone_web/rails/Gemfile")
+FileUtils.cp("Gemfile.lock", "tmp/standalone_web/rails/Gemfile.lock")
+FileUtils.cp(".env.production", "tmp/standalone_web/rails/.env.production")
+FileUtils.cp("app.json", "tmp/standalone_web/rails/app.json")
+FileUtils.cp("config.ru", "tmp/standalone_web/rails/config.ru")
+
+system("tar cfz tmp/fs.tar.gz -C ./tmp/standalone_web/ .")
+
+puts "Creating tmp/fs.meta.json"
+File.write("tmp/fs.meta.json", JSON.dump({
+  number_of_files: Dir.glob("tmp/standalone_web/**/*").size,
+}))
+
+# # Validation test
+# runruby(["-r", "bundler/setup", "-e", 'require "rails"'])
+
+File.write("tmp/main.rb", <<~RUBY)
+require "/bundle/setup"
+
+ENV["ACTIVE_RECORD_ADAPTER"] = "nulldb"
+ENV["DB_POOL"] = "1"
+ENV["RAILS_ENV"] = "production"
+
+# IRB.conf[:USE_SINGLELINE] = false
+# IRB.conf[:USE_MULTILINE] = false
+
+class Thread
+  def self.new(...)
+    f = Fiber.new(...)
+    def f.value = resume
+    f
+  end
+end
+
+require "/rails/config/environment"
+
+request = Rack::MockRequest.env_for("http://localhost:3000", {"HTTP_HOST" => "localhost"})
+puts Rails.application.call(request)
+
+request = Rack::MockRequest.env_for("http://localhost:3000/health", {"HTTP_HOST" => "localhost"})
+puts Rails.application.call(request)
+RUBY
+
+# runruby(["/rails/tmp/main.rb"])
+
+system("#{JCO_SOURCE}/src/jco.js transpile --instantiation --valid-lifting-optimization #{RUBY_BIN} -o pwa/dist/component")

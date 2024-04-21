@@ -1,0 +1,17 @@
+{
+    "scripts": {
+        "dev": "npx esbuild --watch --bundle --servedir=dist src/main.js src/sw.js --outdir=dist"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.2",
+        "esbuild-plugin-polyfill-node": "^0.3.0"
+    },
+    "dependencies": {
+        "@bytecodealliance/preview2-shim": "/home/katei/ghq/github.com/bytecodealliance/jco/packages/preview2-shim",
+        "@electric-sql/pglite": "^0.1.5",
+        "@ruby/wasm-wasi": "^2.5.1-2024-05-01-a",
+        "set-cookie-parser": "^2.6.0",
+        "tar-stream": "^3.1.7",
+        "xhr-shim": "^0.1.3"
+    }
+}

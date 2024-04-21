@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'sidekiq_unique_jobs/web' if ENV['ENABLE_SIDEKIQ_UNIQUE_JOBS_UI'] == true
-require 'sidekiq-scheduler/web'
+require 'sidekiq-scheduler/web' unless ENV["RAILS_WEB"]
 
 class RedirectWithVary < ActionDispatch::Routing::PathRedirect
   def build_response(req)
@@ -47,13 +47,15 @@ Rails.application.routes.draw do
 
   root 'home#index'
 
-  mount LetterOpenerWeb::Engine, at: 'letter_opener' if Rails.env.development?
+  mount LetterOpenerWeb::Engine, at: 'letter_opener' if Rails.env.development? && ENV['RAILS_WEB'].nil?
 
   get 'health', to: 'health#show'
 
   authenticate :user, ->(user) { user.role&.can?(:view_devops) } do
-    mount Sidekiq::Web, at: 'sidekiq', as: :sidekiq
-    mount PgHero::Engine, at: 'pghero', as: :pghero
+    unless ENV["RAILS_WEB"]
+      mount Sidekiq::Web, at: 'sidekiq', as: :sidekiq
+      mount PgHero::Engine, at: 'pghero', as: :pghero
+    end
   end
 
   use_doorkeeper do

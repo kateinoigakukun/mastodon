@@ -11,6 +11,7 @@ class ActivityTracker
   end
 
   def add(value = 1, at_time = Time.now.utc)
+    return unless defined?(Redis)
     key = key_at(at_time)
 
     case @type
@@ -24,6 +25,7 @@ class ActivityTracker
   end
 
   def get(start_at, end_at = Time.now.utc)
+    return [] unless defined?(Redis)
     (start_at.to_date..end_at.to_date).map do |date|
       key = key_at(date.to_time(:utc))
 
@@ -39,6 +41,7 @@ class ActivityTracker
   end
 
   def sum(start_at, end_at = Time.now.utc)
+    return 0 unless defined?(Redis)
     keys = (start_at.to_date...end_at.to_date).flat_map { |date| [key_at(date.to_time(:utc)), legacy_key_at(date)] }.uniq
 
     case @type

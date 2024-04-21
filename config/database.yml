@@ -1,5 +1,5 @@
 default: &default
-  adapter: postgresql
+  adapter: <%= ENV.fetch("ACTIVE_RECORD_ADAPTER", "postgresql") %>
   pool: <%= ENV["DB_POOL"] || (if Sidekiq.server? then Sidekiq[:concurrency] else ENV['MAX_THREADS'] end) || 5 %>
   timeout: 5000
   connect_timeout: 15

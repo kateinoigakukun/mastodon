@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+return if ENV["RAILS_WEB"]
 require_relative '../../lib/mastodon/sidekiq_middleware'
 
 Sidekiq.configure_server do |config|

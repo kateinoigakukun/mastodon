@@ -44,7 +44,17 @@ class RedisConfiguration
 
   private
 
+  class NullConnection
+    def method_missing(*)
+      nil
+    end
+    def zrevrangebyscore(*)
+      []
+    end
+  end
+
   def raw_connection
+    return NullConnection.new unless defined?(Redis)
     Redis.new(url: url, driver: :hiredis)
   end
 end

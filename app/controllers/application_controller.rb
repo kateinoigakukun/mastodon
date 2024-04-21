@@ -25,19 +25,29 @@ class ApplicationController < ActionController::Base
   helper_method :body_class_string
   helper_method :skip_csrf_meta_tags?
 
-  rescue_from ActionController::ParameterMissing, Paperclip::AdapterRegistry::NoHandlerError, with: :bad_request
+  rescue_from ActionController::ParameterMissing, with: :bad_request
+  unless ENV["RAILS_WEB"]
+    rescue_from Paperclip::AdapterRegistry::NoHandlerError, with: :bad_request
+  end
   rescue_from Mastodon::NotPermittedError, with: :forbidden
   rescue_from ActionController::RoutingError, ActiveRecord::RecordNotFound, with: :not_found
   rescue_from ActionController::UnknownFormat, with: :not_acceptable
   rescue_from ActionController::InvalidAuthenticityToken, with: :unprocessable_entity
   rescue_from Mastodon::RateLimitExceededError, with: :too_many_requests
 
-  rescue_from HTTP::Error, OpenSSL::SSL::SSLError, with: :internal_server_error
-  rescue_from Mastodon::RaceConditionError, Stoplight::Error::RedLight, ActiveRecord::SerializationFailure, with: :service_unavailable
+  unless ENV["RAILS_WEB"]
+    rescue_from HTTP::Error, OpenSSL::SSL::SSLError, with: :internal_server_error
+  end
+  unless ENV["RAILS_WEB"]
+    rescue_from Stoplight::Error::RedLight, with: :service_unavailable
+  end
+  rescue_from Mastodon::RaceConditionError, ActiveRecord::SerializationFailure, with: :service_unavailable
 
-  rescue_from Seahorse::Client::NetworkingError do |e|
-    Rails.logger.warn "Storage server error: #{e}"
-    service_unavailable
+  unless ENV["RAILS_WEB"]
+    rescue_from Seahorse::Client::NetworkingError do |e|
+      Rails.logger.warn "Storage server error: #{e}"
+      service_unavailable
+    end
   end
 
   before_action :check_self_destruct!

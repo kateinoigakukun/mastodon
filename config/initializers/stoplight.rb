@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+return if ENV["RAILS_WEB"]
 require 'stoplight'
 
 Rails.application.reloader.to_prepare do

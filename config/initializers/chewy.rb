@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+if ENV["RAILS_WEB"]
+  module Chewy
+    def self.enabled?
+      false
+    end
+  end
+  return
+end
+
 enabled         = ENV['ES_ENABLED'] == 'true'
 host            = ENV.fetch('ES_HOST') { 'localhost' }
 port            = ENV.fetch('ES_PORT') { 9200 }

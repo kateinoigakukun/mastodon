@@ -1,5 +1,17 @@
 # frozen_string_literal: true
 
+if ENV["RAILS_WEB"]
+  class UserMailer
+    class NullMail
+      def deliver_later!(*)
+      end
+    end
+    def self.suspicious_sign_in(*)
+      NullMail.new
+    end
+  end
+else
+
 class UserMailer < Devise::Mailer
   layout 'mailer'
 
@@ -223,4 +235,5 @@ class UserMailer < Devise::Mailer
   def locale
     @resource.locale.presence || I18n.locale || I18n.default_locale
   end
+end
 end

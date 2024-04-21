@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rails PWA Demo</title>
+    <script type="module" src="/boot.js"></script>
+    <style>
+      #boot-console-output {
+        background-color: #0c0c0c;
+        color: #f8f8f2;
+        font-family: monospace;
+        font-size: 0.8em;
+        padding: 1em;
+        white-space: pre-wrap;
+        min-height: 200px;
+        overflow-y: scroll;
+      }
+      #launch-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 0.5em 1em;
+        font-size: 1em;
+        cursor: pointer;
+        border: 1px solid #ccc;
+      }
+      #launch-button:disabled {
+        background-color: #ccc;
+        color: #666;
+      }
+      #reboot-button {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 0.5em 1em;
+        font-size: 1em;
+        cursor: pointer;
+        border: 1px solid #ccc;
+      }
+      #reboot-button:disabled {
+        background-color: #ccc;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Rails PWA Demo</h1>
+    <p>
+      Waiting for the service worker to install and activate the Rails app...
+    </p>
+
+    <p>
+      <button id="launch-button" disabled>Launch the app</button>
+      <button id="reboot-button" disabled>Reboot the app</button>
+    </p>
+
+    <div id="boot-message"></div>
+    <progress id="boot-progress" max="100" value="0"></progress>
+    <pre id="boot-console-output"></pre>
+  </body>
+</html>

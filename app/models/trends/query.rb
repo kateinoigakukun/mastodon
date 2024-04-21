@@ -94,6 +94,7 @@ class Trends::Query
   end
 
   def ids_for_key
+    return [] unless defined?(Redis)
     @ids_for_key ||= redis.zrevrange(key, 0, -1).map(&:to_i)
   end
 

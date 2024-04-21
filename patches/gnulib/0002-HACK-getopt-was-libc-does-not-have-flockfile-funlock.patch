@@ -1,0 +1,26 @@
+From eb315a7a732cba2a1d9fc6dfe67f98036f76ca45 Mon Sep 17 00:00:00 2001
+From: Yuta Saito <kateinoigakukun@gmail.com>
+Date: Sat, 4 May 2024 14:12:50 +0000
+Subject: [PATCH 2/2] [HACK] getopt: was-libc does not have
+ flockfile/funlockfile
+
+---
+ lib/getopt.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/getopt.c b/lib/getopt.c
+index 928306304e..5ab060d83a 100644
+--- a/lib/getopt.c
++++ b/lib/getopt.c
+@@ -46,7 +46,7 @@
+ /* When used standalone, flockfile and funlockfile might not be
+    available.  */
+ # if (!defined _POSIX_THREAD_SAFE_FUNCTIONS \
+-      || (defined _WIN32 && ! defined __CYGWIN__))
++      || (defined _WIN32 && ! defined __CYGWIN__) || __wasi__)
+ #  define flockfile(fp) /* nop */
+ #  define funlockfile(fp) /* nop */
+ # endif
+-- 
+2.43.2
+

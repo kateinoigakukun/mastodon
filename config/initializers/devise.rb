@@ -113,12 +113,18 @@ end
 Warden::Strategies.add(:session_activation_rememberable, Devise::Strategies::SessionActivationRememberable)
 
 Devise.setup do |config|
-  config.warden do |manager|
-    manager.default_strategies(scope: :user).unshift :two_factor_ldap_authenticatable if Devise.ldap_authentication
-    manager.default_strategies(scope: :user).unshift :two_factor_pam_authenticatable  if Devise.pam_authentication
-    manager.default_strategies(scope: :user).unshift :session_activation_rememberable
-    manager.default_strategies(scope: :user).unshift :two_factor_authenticatable
-    manager.default_strategies(scope: :user).unshift :two_factor_backupable
+  unless ENV['RAILS_WEB']
+    config.warden do |manager|
+      manager.default_strategies(scope: :user).unshift :two_factor_ldap_authenticatable if Devise.ldap_authentication
+      manager.default_strategies(scope: :user).unshift :two_factor_pam_authenticatable  if Devise.pam_authentication
+      manager.default_strategies(scope: :user).unshift :session_activation_rememberable
+      manager.default_strategies(scope: :user).unshift :two_factor_authenticatable
+      manager.default_strategies(scope: :user).unshift :two_factor_backupable
+    end
+  else
+    config.warden do |manager|
+      manager.default_strategies(scope: :user).unshift :session_activation_rememberable
+    end
   end
 
   # The secret key used by Devise. Devise uses this key to generate

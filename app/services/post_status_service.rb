@@ -118,6 +118,7 @@ class PostStatusService < BaseService
   def postprocess_status!
     process_hashtags_service.call(@status)
     Trends.tags.register(@status)
+    return if ENV["RAILS_WEB"]
     LinkCrawlWorker.perform_async(@status.id)
     DistributionWorker.perform_async(@status.id)
     ActivityPub::DistributionWorker.perform_async(@status.id)
