@@ -147,13 +147,19 @@ ia:
         setting_advanced_layout: Activar le interfacie web avantiate
         setting_always_send_emails: Sempre inviar notificationes per e-mail
         setting_default_language: Lingua de publication
+        setting_disable_swiping: Disactivar le movimentos per glissamento
         setting_display_media: Visualisation de medios
         setting_display_media_default: Predefinite
         setting_display_media_hide_all: Celar toto
         setting_display_media_show_all: Monstrar toto
+        setting_expand_spoilers: Sempre expander messages marcate con avisos de contento
+        setting_hide_network: Cela tu rete social
+        setting_reduce_motion: Reducer movimento in animationes
         setting_system_font_ui: Usar typo de litteras predefinite del systema
         setting_theme: Thema de sito
         setting_trends: Monstrar le tendentias de hodie
+        setting_unfollow_modal: Monstrar dialogo de confirmation ante cessar de sequer alcuno
+        setting_use_blurhash: Monstrar imagines degradate multicolor pro medios celate
         setting_use_pending_items: Modo lente
         severity: Severitate
         sign_in_token_attempt: Codice de securitate
@@ -162,6 +168,8 @@ ia:
         username: Nomine de usator
         username_or_email: Nomine de usator o e-mail
         whole_word: Parola integre
+      email_domain_block:
+        with_dns_records: Includer registrationes MX e IPs del dominio
       featured_tag:
         name: Hashtag
       filters:
@@ -169,53 +177,93 @@ ia:
           hide: Celar completemente
           warn: Celar con un advertimento
       form_admin_settings:
+        activity_api_enabled: Publicar statisticas aggregate re le activitate de usator in le API
+        backups_retention_period: Periodo de retention del archivo de usator
         bootstrap_timeline_accounts: Recommenda sempre iste contos a nove usatores
+        closed_registrations_message: Message personalisate quando le inscriptiones non es disponibile
+        content_cache_retention_period: Periodo de retention del contento remote
         custom_css: CSS personalisate
+        mascot: Personalisar le mascotte (hereditage)
+        media_cache_retention_period: Periodo de retention del cache multimedial
+        peers_api_enabled: Publicar le lista de servitores discoperite in le API
         profile_directory: Activar directorio de profilos
+        registrations_mode: Qui pote inscriber se
+        require_invite_text: Requirer un ration pro junger se
+        show_domain_blocks: Monstrar le blocadas de dominio
+        show_domain_blocks_rationale: Monstrar perque le dominios era blocate
         site_contact_email: Adresse de e-mail de contacto
         site_contact_username: Nomine de usator de contacto
+        site_extended_description: Description extense
         site_short_description: Description de servitor
         site_terms: Politica de confidentialitate
         site_title: Nomine de servitor
         status_page_url: URL del pagina de stato
         theme: Thema predefinite
         thumbnail: Miniatura de servitor
+        timeline_preview: Permitter accesso non authenticate a chronologias public
+        trendable_by_default: Permitter tendentias sin revision previe
         trends: Activar tendentias
+        trends_as_landing_page: Usar tendentias como pagina de destination
+      interactions:
+        must_be_follower: Blocar notificationes de non-sequaces
+        must_be_following: Blocar notificationes de gente que tu non sequer
+        must_be_following_dm: Blocar messages directe de gente que tu non seque
       invite:
         comment: Commento
+      invite_request:
+        text: Perque vole tu junger te?
       ip_block:
         comment: Commento
         ip: IP
         severities:
           no_access: Blocar le accesso
+          sign_up_block: Blocar inscriptiones
+          sign_up_requires_approval: Limitar inscriptiones
         severity: Regula
       notification_emails:
+        appeal: Alcuno appella un decision de moderator
         digest: Inviar emails compendio
+        favourite: Alcuno appreciava tu message
+        follow: Alcuno te sequeva
+        follow_request: Alcuno requireva de sequer te
+        mention: Alcuno te mentionava
+        pending_account: Nove conto besonia de revision
+        reblog: Alcuno promoveva tu message
+        report: Un nove reporto es inviate
         software_updates:
           all: Notificar sur tote le actualisationes
           critical: Notificar solmente sur actualisationes critic
           label: Un nove version de Mastodon es disponibile
           none: Nunquam notificar sur actualisationes (non recommendate)
+          patch: Notificar re actualisationes de correction de bug
+        trending_tag: Un nove tendentia require revision
       rule:
         hint: Information additional
         text: Regula
       settings:
         indexable: Includer pagina de profilo in le motores de recerca
+        show_application: Monstrar ab que app tu ha inviate un message
       tag:
         listable: Permitter a iste hashtag apparer in le recercas e suggestiones
         name: Hashtag
+        trendable: Permitter a iste hashtag de sub tendentias
         usable: Permitter al messages usar iste hashtag
       user:
         role: Rolo
         time_zone: Fuso horari
       user_role:
+        color: Color de insignia
+        highlighted: Monstrar le rolo como insignia sur le profilos de usator
         name: Nomine
         permissions_as_keys: Permissiones
         position: Prioritate
       webhook:
         events: Eventos activate
+        template: Modello de carga utile
+        url: URL de extremo
     'no': 'No'
     not_recommended: Non recommendate
+    overridden: Supplantate
     recommended: Recommendate
     required:
       mark: "*"

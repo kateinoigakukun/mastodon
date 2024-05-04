@@ -106,6 +106,9 @@ ia:
       pending: Attende revision
       perform_full_suspension: Suspender
       previous_strikes: Previe admonitiones
+      previous_strikes_description_html:
+        one: Iste conto ha <strong>un</strong> admonition.
+        other: Iste conto ha <strong>%{count}</strong> admonitiones.
       promote: Promover
       protocol: Protocollo
       public: Public
@@ -244,37 +247,100 @@ ia:
         create_user_role_html: "%{name} creava rolo de %{target}"
         demote_user_html: "%{name} degradava usator %{target}"
         destroy_announcement_html: "%{name} deleva annuncio %{target}"
+        destroy_canonical_email_block_html: "%{name} disblocava email con le hash %{target}"
         destroy_custom_emoji_html: "%{name} deleva emoji %{target}"
+        destroy_domain_allow_html: "%{name} impediva le federation con dominio %{target}"
         destroy_domain_block_html: "%{name} disblocava dominio %{target}"
+        destroy_email_domain_block_html: "%{name} disblocava le dominio email %{target}"
+        destroy_instance_html: "%{name} purgava le dominio %{target}"
+        destroy_ip_block_html: "%{name} deleva le regula pro IP %{target}"
+        destroy_status_html: "%{name} removeva le message de %{target}"
+        destroy_unavailable_domain_html: "%{name} resumeva le consignation al dominio %{target}"
         destroy_user_role_html: "%{name} deleva le rolo de %{target}"
+        disable_2fa_user_html: "%{name} disactivava le authentication a duo factores pro le usator %{target}"
+        disable_custom_emoji_html: "%{name} disactivava le emoticone %{target}"
+        disable_sign_in_token_auth_user_html: "%{name} disactivava authentication per testimonio via email pro %{target}"
+        disable_user_html: "%{name} disactivava le accesso pro le usator %{target}"
+        enable_custom_emoji_html: "%{name} activava le emoticone %{target}"
+        enable_sign_in_token_auth_user_html: "%{name} activava le authentication per testimonio via email pro %{target}"
+        enable_user_html: "%{name} activava le accesso pro le usator %{target}"
+        memorialize_account_html: "%{name} mutava le conto de %{target} in un pagina commemorative"
+        promote_user_html: "%{name} promoveva le usator %{target}"
+        reject_appeal_html: "%{name} refusava le appello del decision de moderation de %{target}"
+        reject_user_html: "%{name} refusava le inscription de %{target}"
+        remove_avatar_user_html: "%{name} removeva le avatar de %{target}"
+        reopen_report_html: "%{name} reaperiva le reporto %{target}"
+        resend_user_html: "%{name} reinviava le email de confirmation pro %{target}"
+        reset_password_user_html: "%{name} reinitialisava le contrasigno del usator %{target}"
+        resolve_report_html: "%{name} resolveva le reporto %{target}"
+        sensitive_account_html: "%{name} marcava como sensibile le medios de %{target}"
+        silence_account_html: "%{name} limitava le conto de %{target}"
+        suspend_account_html: "%{name} suspendeva le conto de %{target}"
+        unassigned_report_html: "%{name} de-assignava le reporto %{target}"
+        unblock_email_account_html: "%{name} disblocava le adresse email de %{target}"
+        unsensitive_account_html: "%{name} dismarcava como sensibile le medios de %{target}"
+        unsilence_account_html: "%{name} removeva le limite del conto de %{target}"
+        unsuspend_account_html: "%{name} removeva le suspension del conto de %{target}"
+        update_announcement_html: "%{name} actualisava le annuncio %{target}"
+        update_custom_emoji_html: "%{name} actualisava le emoticone %{target}"
+        update_domain_block_html: "%{name} actualisava le blocada de dominio pro %{target}"
+        update_ip_block_html: "%{name} cambiava le regula pro IP %{target}"
+        update_status_html: "%{name} actualisava le message per %{target}"
+        update_user_role_html: "%{name} cambiava le rolo de %{target}"
       deleted_account: conto delite
+      empty: Nulle registrationes trovate.
+      filter_by_action: Filtrar per action
+      filter_by_user: Filtrar per usator
+      title: Registro de controlo
     announcements:
       destroyed_msg: Annuncio delite con successo!
       edit:
         title: Modificar annuncio
       empty: Necun annuncios trovate.
+      live: Al vivo
       new:
         create: Crear annuncio
         title: Nove annuncio
       publish: Publicar
       published_msg: Annuncio publicate con successo!
+      scheduled_for: Programmate pro %{time}
+      scheduled_msg: Annuncio programmate pro le publication!
       title: Annuncios
+      updated_msg: Annuncio actualisate con successo!
+    critical_update_pending: Actualisation critic pendente
     custom_emojis:
+      assign_category: Assignar categoria
       by_domain: Dominio
       copied_msg: Copia local del emoji create con successo
       copy: Copiar
+      copy_failed_msg: Impossibile crear un copia local de ille emoticone
       create_new_category: Crear nove categoria
       created_msg: Emoji create con successo!
       delete: Deler
+      destroyed_msg: Emoticone destruite con successo destroyed!
       disable: Disactivar
       disabled: Disactivate
       disabled_msg: Emoji disactivate con successo
+      emoji: Emoticone
       enable: Activar
       enabled: Activate
       enabled_msg: Emoji activate con successo
+      image_hint: PNG o GIF usque %{size}
+      list: Listar
+      listed: Listate
       new:
         title: Adder nove emoji personalisate
+      no_emoji_selected: Nulle emoticones ha essite cambiate perque nulle ha essite seligite
+      not_permitted: A te non es permittite de exequer iste action
+      overwrite: Superscriber
+      shortcode: Via breve
+      shortcode_hint: Al minus 2 characteres, solo characteres alphanumeric e lineettas basse
       title: Emojis personalisate
+      uncategorized: Sin categoria
+      unlist: Non listar
+      unlisted: Non listate
+      update_failed_msg: Impossibile actualisar ille emoticone
+      updated_msg: Emoticone actualisate con successo!
       upload: Incargar
     dashboard:
       active_users: usatores active
@@ -282,17 +348,27 @@ ia:
       media_storage: Immagazinage de medios
       new_users: nove usatores
       opened_reports: reportos aperte
+      resolved_reports: reportos resolvite
       software: Software
+      sources: Fontes de inscription
+      space: Uso de spatio
+      title: Pannello de controlo
       top_languages: Linguas le plus active
       top_servers: Servitores le plus active
       website: Sito web
+    disputes:
+      appeals:
+        empty: Nulle appellos trovate.
+        title: Appellos
     domain_allows:
       add_new: Permitter federation con dominio
+      created_msg: Le dominio ha essite permittite con successo pro federation
       export: Exportar
       import: Importar
     domain_blocks:
       confirm_suspension:
         cancel: Cancellar
+        confirm: Suspender
         stop_communication: Tu servitor stoppara le communication con iste servitores.
       domain: Dominio
       edit: Modificar un bloco de dominio
@@ -300,10 +376,13 @@ ia:
       import: Importar
       new:
         severity:
+          noop: Nemo
           silence: Limitar
           suspend: Suspender
       private_comment: Commento private
       public_comment: Commento public
+      reject_media: Refusar files multimedial
+      reject_reports: Refusar reportos
     email_domain_blocks:
       add_new: Adder nove
       delete: Deler
@@ -311,6 +390,7 @@ ia:
       new:
         create: Adder un dominio
         title: Blocar un nove dominio de e-mail
+      not_permitted: Non permittite
       title: Dominios de e-mail blocate
     export_domain_allows:
       no_file: Necun file seligite
