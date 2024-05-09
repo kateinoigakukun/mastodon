@@ -76,7 +76,12 @@ module Kernel
 
   def require(path)
     remote_paths = %w[app config db lib public]
-    if path.end_with?(".rb") && remote_paths.any? { |remote_path| path.start_with?("/rails/#{remote_path}") }
+    development_mode = JS.global[:RAILS_WEB_DEVELOPMENT] != JS::Undefined
+    load_from_remote = development_mode && path.end_with?(".rb") && remote_paths.any? do |remote_path|
+      path.start_with?("/rails/#{remote_path}")
+    end
+
+    if load_from_remote
       if $LOADED_FEATURES.include?(path)
         return false
       end
