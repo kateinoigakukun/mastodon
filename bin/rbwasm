@@ -204,7 +204,14 @@ FileUtils.cp(".env.production", "tmp/standalone_web/rails/.env.production")
 FileUtils.cp("app.json", "tmp/standalone_web/rails/app.json")
 FileUtils.cp("config.ru", "tmp/standalone_web/rails/config.ru")
 
-system("tar cfz tmp/fs.tar.gz -C ./tmp/standalone_web/ .")
+system(%w[
+  tar cfz tmp/fs.tar.gz
+  --exclude='**/.git/**/*'
+  --exclude='bundle/ruby/3.4.0+0/bundler/gems/nokogiri-*/ext/**/*'
+  --exclude='bundle/ruby/3.4.0+0/bundler/gems/nokogiri-*/ports/**/*'
+  -C ./tmp/standalone_web/
+  .
+].map { "'#{_1}'" }.join(" "))
 
 puts "Creating tmp/fs.meta.json"
 File.write("tmp/fs.meta.json", JSON.dump({

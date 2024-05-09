@@ -10,7 +10,9 @@ async function boot({ bootMessage, bootProgress, bootConsoleOutput }) {
   }
   const oldRegistrations = await navigator.serviceWorker.getRegistrations();
   for (const registration of oldRegistrations) {
-    await registration.unregister();
+    if (registration.installing.state === "installing") {
+      return registration;
+    }
   }
   await navigator.serviceWorker.register("/rails.sw.js", {
     scope: "/",
@@ -47,7 +49,7 @@ async function init() {
   const launchButton = document.getElementById("launch-button");
   launchButton.disabled = false;
   launchButton.addEventListener("click", async function() {
-    window.location.href = "/";
+    window.open("/", "_blank");
   });
   const rebootButton = document.getElementById("reboot-button");
   rebootButton.disabled = false;

@@ -133,8 +133,6 @@ async function _fetchFileData(progress) {
 
     await Promise.all(dataWorks)
 
-    mkdir_p("/home/katei/ghq/github.com/ruby/ruby.wasm")
-
     return root
 }
 let fetchFileDataTask = null

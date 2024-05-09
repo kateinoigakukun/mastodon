@@ -1,3 +1,12 @@
+def measure(label)
+  puts "[rails_web] #{label}..."
+  start = Time.now
+  yield
+  duration = Time.now - start
+  puts "[rails_web] #{label} done in #{duration.round(2)}s"
+end
+
+
 require "js"
 require "securerandom"
 
@@ -60,11 +69,16 @@ module Sidekiq
   end
 end
 
-require "bundler/setup"
-require "connection_pool"
-require "zeitwerk"
-require "active_record"
-require "nulldb/rails"
+measure("bundler/setup") do
+  require "bundler/setup"
+end
+
+measure("prerequisites gems") do
+  require "connection_pool"
+  require "zeitwerk"
+  require "active_record"
+  require "nulldb/rails"
+end
 
 module Kernel
   module_function
@@ -137,9 +151,13 @@ module PG
   end
 end
 
-require "active_record/connection_adapters/postgresql_adapter"
+measure("active_record/connection_adapters/postgresql_adapter") do
+  require "active_record/connection_adapters/postgresql_adapter"
+end
 
-Kernel.eval(JS.global.fetch("/pglite.rb").await.text.await.to_s, TOPLEVEL_BINDING, "/pglite.rb")
+measure("fetch and eval pglite.rb") do
+  Kernel.eval(JS.global.fetch("/pglite.rb").await.text.await.to_s, TOPLEVEL_BINDING, "/pglite.rb")
+end
 
 require "/rails/config/environment"
 Rails.autoloaders.log!
