@@ -1,1 +1,6 @@
 /node_modules
+/dist/**/*
+!/dist/mastodon_development.sql
+!/dist/pglite.rb
+!/dist/rails.main.rb
+!/dist/boot.html
