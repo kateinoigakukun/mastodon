@@ -1,3 +1,16 @@
+async function registerServiceWorker() {
+  const oldRegistrations = await navigator.serviceWorker.getRegistrations()
+  for (const registration of oldRegistrations) {
+    if (registration.installing.state === "installing") {
+      return;
+    }
+  }
+
+  await navigator.serviceWorker.register("/rails.sw.js", {
+    scope: "/", type: "module"
+  });
+}
+
 async function boot({ bootMessage, bootProgress, bootConsoleOutput }) {
   if (!("serviceWorker" in navigator)) {
     console.error("Service Worker is not supported in this browser.");
@@ -8,16 +21,9 @@ async function boot({ bootMessage, bootProgress, bootConsoleOutput }) {
     return navigator.serviceWorker.ready;
   }
 
-  const oldRegistrations = await navigator.serviceWorker.getRegistrations()
-  for (const registration of oldRegistrations) {
-    if (registration.installing.state === "installing") {
-      return registration;
-    }
-  }
+  await registerServiceWorker();
 
-  await navigator.serviceWorker.register("/rails.sw.js", {
-    scope: "/", type: "module"
-  });
+  bootMessage.textContent = "Waiting for Service Worker to activate...";
 
   navigator.serviceWorker.addEventListener("message", function(event) {
     switch (event.data.type) {

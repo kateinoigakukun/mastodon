@@ -45,18 +45,53 @@
     </style>
   </head>
   <body>
-    <h1>Rails PWA Demo</h1>
+    <h1>Mastodon in the browser demo</h1>
     <p>
-      Waiting for the service worker to install and activate the Rails app...
+      Wait for the Service Worker to install and boot the app. This may take a while.
     </p>
+
+    <details>
+      <summary>Demo account information</summary>
+      <p>You can log in to the app with the following credentials:</p>
+      <div>
+        <strong>Email:</strong> <code>admin@localhost</code><br />
+        <strong>Password:</strong> <code>mastodonadmin</code>
+      </div>
+    </details>
 
     <p>
       <button id="launch-button" disabled>Launch the app</button>
-      <button id="reboot-button" disabled>Reboot the app</button>
+      <button id="reboot-button" disabled>Reboot the app*</button>
     </p>
 
     <div id="boot-message"></div>
     <progress id="boot-progress" max="100" value="0"></progress>
     <pre id="boot-console-output"></pre>
+    <hr />
+    <p>
+      <small>
+        * Please ensure you close all tabs of this app before rebooting to unregister the old Service Worker.
+      </small>
+    </p>
+
+    <hr />
+
+    <h2>FAQ</h2>
+
+    <h3>What is this?</h3>
+    <p>
+      This is a demo of running Mastodon, which is a Ruby on Rails application, in the browser using <a href="https://github.com/ruby/ruby.wasm" target="_blank">ruby.wasm</a>.
+    </p>
+
+    <h3>How does it work?</h3>
+    <p>
+      The Rails application runs in a Service Worker in the browser, and it intercepts network requests
+      to the Mastodon server and responds them within the worker.
+    </p>
+
+    <h2>Source code</h2>
+    <p>
+      The source code of this demo is available at <a href="https://github.com/kateinoigakukun/mastodon/tree/katei/wasmify" target="_blank">kateinoigakukun/mastodon</a>.
+    </p>
   </body>
 </html>
