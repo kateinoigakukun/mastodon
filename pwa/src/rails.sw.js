@@ -328,8 +328,7 @@ class RailsRequestQueue {
     }
 }
 
-
-const requestQueue = new RailsRequestQueue(_respondWithRails);
+const requestQueue = new RailsRequestQueue(respondWithRails);
 
 self.addEventListener('fetch', function (event) {
     const bootResources = [
@@ -341,12 +340,6 @@ self.addEventListener('fetch', function (event) {
         return;
     }
     const url = new URL(event.request.url);
-    if (url.pathname.startsWith("/packs/")) {
-        console.log('[rails-web] Fetching pack file from network:', event.request.url);
-        const publicPath = url.pathname.replace("/packs/", "/rails/public/packs/")
-        const newURL = new URL(publicPath, location.origin)
-        return event.respondWith(fetch(newURL));
-    }
     {
         const publicTopLevelPaths = [
             "500.html",
@@ -391,16 +384,7 @@ self.addEventListener('message', async function (event) {
     }
 })
 
-async function _respondWithRails(request) {
-    try {
-        const response = await respondWithRails(request);
-        return response
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-const respondWithRails = async (request) => {
+async function respondWithRails(request) {
     const vm = await initRails(bootProgress);
 
     const railsURL = request.url.replace("https://", "http://");

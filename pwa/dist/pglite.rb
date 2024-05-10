@@ -1,4 +1,9 @@
 module PGlite
+  def self.log(message)
+    return unless ENV["RAILS_ENV"] == "development"
+    puts "[pglite] #{message}"
+  end
+
   class Result
     def initialize(res)
       @res = res
@@ -49,10 +54,6 @@ module PGlite
         JS::Object.keys(raw_row).each do |col|
           value = raw_row[col]
           row[col.to_s] = translate_value(value)
-        end
-        puts "[pglite] row: #{row}"
-        row.each do |col, value|
-          puts "[pglite]   row[#{col}]: #{value} (#{value.class})"
         end
         yield row
       end
@@ -113,11 +114,11 @@ module ActiveRecord
         end
 
         def raw_query(sql, params)
-          puts "[pglite] query: #{sql} with params: #{params}"
+          PGlite.log "[pglite] query: #{sql} with params: #{params}"
           params = params.map { |param| param.to_js }
           raw_res = JS.global[:PGLite4Rails].query(sql, params.to_js).await
           result = PGlite::Result.new(raw_res)
-          puts "[pglite] result: #{result.values}"
+          PGlite.log "[pglite] result: #{result.values}"
           @last_result = result
           result
         rescue => e
@@ -140,14 +141,12 @@ module ActiveRecord
         end
 
         def exec_prepared(name, params)
-          puts "[pglite] query prepared: #{name} with params: #{params}"
           sql = @prepared_statements_map[name]
           exec_params(sql, params)
         end
 
 
         def prepare(name, sql, param_types = nil)
-          puts "[pglite] prepare: #{name} with sql: #{sql}"
           @prepared_statements_map[name] = sql
         end
 
@@ -165,7 +164,6 @@ module ActiveRecord
       end
 
       def initialize(...)
-        puts "[pglite] initialize"
         AbstractAdapter.instance_method(:initialize).bind_call(self, ...)
         @connection_parameters = @config.compact
 
@@ -184,13 +182,11 @@ module ActiveRecord
       module Type
         class BigintArray < ActiveRecord::Type::Value
           def deserialize(value)
-            puts "[pglite] deserialize bigint array: #{value}"
             return nil if value.nil? || value == ""
             value[1..-2].split(",").map(&:to_i)
           end
 
           def serialize(value)
-            puts "[pglite] serialize bigint array: #{value}"
             return nil if value.nil? || value == ""
             "{" + value.map(&:to_s).join(", ") + "}"
           end

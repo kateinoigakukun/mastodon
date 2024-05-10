@@ -26,9 +26,8 @@ def system(command)
   ret
 end
 
-RUBYGEMS_SOURCE = "/home/katei/ghq/github.com/rubygems/rubygems"
-RUBY_WASM_ROOT = "/home/katei/ghq/github.com/ruby/ruby.wasm"
-JCO_SOURCE = "/home/katei/ghq/github.com/ruby/ruby.wasm/vendor/jco"
+RUBYGEMS_SOURCE = File.join(Dir.pwd, "vendor/rubygems")
+JCO_SOURCE = "./pwa/node_modules/@bytecodealliance/jco"
 WASI_SDK_PATH = ENV["WASI_SDK_PATH"] || raise("WASI_SDK_PATH environment variable is not set")
 IDN_DIR = File.join(Dir.pwd, "tmp/libidn/install")
 DEST_DIR = "tmp/standalone_web"
@@ -84,13 +83,14 @@ Bundler.with_original_env do
 
     with_env(
       "BUNDLE_ONLY" => "web",
+      "BUNDLE_FROZEN" => "true",
       "BUNDLE_PATH" => File.expand_path(File.join(DEST_DIR, "bundle")),
       "BUNDLE_BUILD__JS" => "--enable-component-model",
       "BUNDLE_BUILD__IDN___RUBY" => "--with-idn-dir=#{File.join(IDN_DIR, "usr/local")}",
       "RUBYOPT" => "-I#{RUBYGEMS_SOURCE}/lib",
       "GEMRC" => f.path,
     ) do
-        system(%Q(#{RUBYGEMS_SOURCE}/bundler/exe/bundle install --target-rbconfig #{RUBY_WASM_ROOT}/rubies/ruby-head-wasm32-unknown-wasip1-pic-full/usr/local/lib/ruby/3.4.0+0/wasm32-wasi/rbconfig.rb))
+      system(%Q(#{RUBYGEMS_SOURCE}/bundler/exe/bundle install --target-rbconfig #{Dir.pwd}/rubies/ruby-head-wasm32-unknown-wasip1-pic-full/usr/local/lib/ruby/3.4.0+0/wasm32-wasi/rbconfig.rb))
     end
   end
 end
@@ -178,8 +178,8 @@ system(
 )
 
 def runruby(args)
-  FileUtils.mkdir_p("tmp/standalone_web/home/me")
-  system (%w[
+  FileUtils.mkdir_p("#{DEST_DIR}/home/me")
+  system (%W[
     wasmtime run
     --env BUNDLE_ONLY=web
     --env BUNDLE_PATH=/bundle
@@ -187,36 +187,62 @@ def runruby(args)
     --env HOME=/home/me
     --env RAILS_ENV=production
     --env RAILS_WEB=1
-    --dir tmp/standalone_web/home/me::/home/me
+    --dir #{DEST_DIR}/home/me::/home/me
     --dir .::/rails
-    --dir tmp/standalone_web/usr::/usr
-    --dir tmp/standalone_web/bundle::/bundle
+    --dir #{DEST_DIR}/usr::/usr
+    --dir #{DEST_DIR}/bundle::/bundle
   ] + [RUBY_BIN] + args.to_a).map { "'#{_1}'" }.join(" ")
 end
 
-FileUtils.mkdir_p("tmp/standalone_web/rails")
+FileUtils.mkdir_p("#{DEST_DIR}/rails")
 %w[app config db lib public].each do |dir|
-  system("rsync -a #{dir}/ tmp/standalone_web/rails/#{dir}/")
+  system("rsync -a #{dir}/ #{DEST_DIR}/rails/#{dir}/")
 end
-FileUtils.cp("Gemfile", "tmp/standalone_web/rails/Gemfile")
-FileUtils.cp("Gemfile.lock", "tmp/standalone_web/rails/Gemfile.lock")
-FileUtils.cp(".env.production", "tmp/standalone_web/rails/.env.production")
-FileUtils.cp("app.json", "tmp/standalone_web/rails/app.json")
-FileUtils.cp("config.ru", "tmp/standalone_web/rails/config.ru")
+FileUtils.cp("Gemfile", "#{DEST_DIR}/rails/Gemfile")
+FileUtils.cp("Gemfile.lock", "#{DEST_DIR}/rails/Gemfile.lock")
+File.write("#{DEST_DIR}/rails/.env.production", <<~ENV)
+LOCAL_DOMAIN=localhost
+SINGLE_USER_MODE=true
+SECRET_KEY_BASE=a4e798c5119316eecd8152a27b249d7c8dd3b5f91de4b1c17cb3aa4dded992d491edac2c0f04ad9b771c70627d863399994126068c8c7ff68bff207e5a74aa30
+OTP_SECRET=d6ded6df389090f80be7569a6a660911d6eb43dae31833f436ab2c372a97ce0c18758fcba08ee1f96d4d60e77600f9705cc3e81a594c793e417b59a71e882f69
+VAPID_PRIVATE_KEY=LsPOYsXyZhOylr7LjXERLSLCu077ViOWAOBlEgYVmeo=
+VAPID_PUBLIC_KEY=BNuQei3AJ2IChENzjREilbluz0k1CYNZgqlGaupOLlzZ6Wi5CX4Ei7T0Ndl5Sq62FXDpEDSzPCTPPkQSfekLawA=
+DB_HOST=/var/run/postgresql
+DB_PORT=5432
+DB_NAME=mastodon_production
+DB_USER=mastodon
+DB_PASS=
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+SMTP_SERVER=smtp.mailgun.org
+SMTP_PORT=587
+SMTP_LOGIN=
+SMTP_PASSWORD=
+SMTP_AUTH_METHOD=plain
+SMTP_OPENSSL_VERIFY_MODE=none
+SMTP_ENABLE_STARTTLS=auto
+SMTP_FROM_ADDRESS='Mastodon <notifications@localhost>'
+UPDATE_CHECK_URL=
+ENV
+FileUtils.cp("app.json", "#{DEST_DIR}/rails/app.json")
+FileUtils.cp("config.ru", "#{DEST_DIR}/rails/config.ru")
 
-system(%w[
-  tar cfz tmp/fs.tar.gz
+system(%W[
+  tar cfz pwa/dist/fs.tar.gz
   --exclude='**/.git/**/*'
-  --exclude='bundle/ruby/3.4.0+0/bundler/gems/nokogiri-*/ext/**/*'
-  --exclude='bundle/ruby/3.4.0+0/bundler/gems/nokogiri-*/ports/**/*'
-  -C ./tmp/standalone_web/
+  --exclude='bundle/ruby/*/cache/**/*'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ext/**/*'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ports/**/*'
+  -C #{DEST_DIR}
   .
 ].map { "'#{_1}'" }.join(" "))
 
-puts "Creating tmp/fs.meta.json"
-File.write("tmp/fs.meta.json", JSON.dump({
-  number_of_files: Dir.glob("tmp/standalone_web/**/*").size,
+puts "Creating pwa/dist/fs.meta.json"
+File.write("pwa/dist/fs.meta.json", JSON.dump({
+  number_of_files: Dir.glob("#{DEST_DIR}/**/*").size,
 }))
+system("rsync -a public/ pwa/dist/rails/public/")
 
 # # Validation test
 # runruby(["-r", "bundler/setup", "-e", 'require "rails"'])

@@ -11,7 +11,7 @@ gem 'rack', '~> 2.2.7'
 gem 'rails-html-sanitizer', '~> 1.6'
 
 # For why irb is in the Gemfile, see: https://ruby.social/@st0012/111444685161478182
-gem 'irb', '~> 1.8'
+gem 'irb', '~> 1.13.1'
 
 gem 'haml-rails', '~>2.0', group: [:default, :web]
 gem 'pg', '~> 1.5'

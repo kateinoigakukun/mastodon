@@ -3,6 +3,7 @@
         "dev": "npx esbuild --watch --bundle --servedir=dist src/main.js src/sw.js --outdir=dist"
     },
     "devDependencies": {
+        "@bytecodealliance/jco": "^1.2.4",
         "esbuild": "^0.20.2",
         "esbuild-plugin-polyfill-node": "^0.3.0"
     },

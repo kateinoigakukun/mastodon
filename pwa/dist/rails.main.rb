@@ -8,39 +8,13 @@ end
 
 
 require "js"
-require "securerandom"
 
 ENV["ACTIVE_RECORD_ADAPTER"] = "pglite"
 # ENV["ACTIVE_RECORD_ADAPTER"] = "nulldb"
 ENV["DB_POOL"] = "1"
 ENV["RAILS_ENV"] = "production"
 ENV["RAILS_LOG_LEVEL"] = "debug"
-
 ENV["RAILS_WEB"] = "1"
-
-ENV["LOCAL_DOMAIN"] = "localhost"
-ENV["SINGLE_USER_MODE"] = "true"
-ENV["SECRET_KEY_BASE"] = "d4398e4af52f1fc5be5c3c8764e9ecce7beac5462826cb8b649373b2aad5a0f133598ed817c4e9931e943041460d6b6eda40a854e825e1bbd510c4594b1538f2"
-ENV["OTP_SECRET"] = "bd85e7dabd3871e38bed0c226f52b70e178b8672f26e82e3eab9693aef85efd868ce209c12e9014c4f6c5dabe238524b2a8f30c01a53c596b39799e7e1ec0949"
-ENV["VAPID_PRIVATE_KEY"] = "tNlzaQf/SppJYEV+Wwei0gBxHXwylml5TofxxO2zclw="
-ENV["VAPID_PUBLIC_KEY"] = "aaAAcyTvTWoSmNQHqHubPhQL3h7PAmGa4V2aDmX37Y1v1UEgl3420BRJ+zmMYjiOmoqYJ+Q5/zQMz5MWQjocyu8="
-ENV["DB_HOST"] = "/var/run/postgresql"
-ENV["DB_PORT"] = "5432"
-ENV["DB_NAME"] = "mastodon_production"
-ENV["DB_USER"] = "mastodon"
-ENV["DB_PASS"] = ""
-ENV["REDIS_HOST"] = "localhost"
-ENV["REDIS_PORT"] = "6379"
-ENV["REDIS_PASSWORD"] = ""
-ENV["SMTP_SERVER"] = "smtp.mailgun.org"
-ENV["SMTP_PORT"] = "587"
-ENV["SMTP_LOGIN"] = ""
-ENV["SMTP_PASSWORD"] = ""
-ENV["SMTP_AUTH_METHOD"] = "plain"
-ENV["SMTP_OPENSSL_VERIFY_MODE"] = "none"
-ENV["SMTP_ENABLE_STARTTLS"] = "auto"
-ENV["SMTP_FROM_ADDRESS"] = "Mastodon <notifications@localhost>"
-ENV["UPDATE_CHECK_URL"]=""
 
 class Thread
   def self.new(...)
@@ -50,8 +24,6 @@ class Thread
   end
 end
 
-module HTTP
-end
 module HTTP
   class Error < StandardError; end
   class ConnectionError < Error; end
@@ -117,6 +89,7 @@ module Kernel
   end
 end
 
+# HACK: for "pg" gem loading in ActiveRecord since we don't have actual pg gem
 module Kernel
   alias_method :rails_web_original_require_pglite_adapter, :require
   def require(path)
@@ -159,10 +132,14 @@ measure("fetch and eval pglite.rb") do
   Kernel.eval(JS.global.fetch("/pglite.rb").await.text.await.to_s, TOPLEVEL_BINDING, "/pglite.rb")
 end
 
-require "/rails/config/environment"
+measure("/rails/config/environment") do
+  require "/rails/config/environment"
+end
 Rails.autoloaders.log!
 
 class Status
+  # HACK: PGlite does not support "insert_returning", so we need to assign id
+  # before insert
   before_create do
     self.created_at = Time.now.utc
     self.updated_at = Time.now.utc
@@ -212,3 +189,5 @@ $rack_handler = proc do |url, request, cookie|
   }
   res
 end
+
+puts "[rails_web] ready"

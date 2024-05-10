@@ -1,0 +1,3 @@
+[submodule "vendor/rubygems"]
+	path = vendor/rubygems
+	url = git@github.com:kateinoigakukun/rubygems.git
