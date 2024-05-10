@@ -10,7 +10,6 @@ module RoutingHelper
     include Rails.application.routes.url_helpers
 
     def default_url_options
-      # ActionMailer::Base.default_url_options
       Rails.configuration.action_mailer.default_url_options
     end
   end
