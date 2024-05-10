@@ -213,9 +213,16 @@ system(%W[
   --exclude='**/.git/**/*'
   --exclude='rails/public/emoji'
   --exclude='rails/public/ocr'
-  --exclude='bundle/ruby/*/cache/**/*'
-  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ext/**/*'
-  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ports/**/*'
+  --exclude='rails/public/packs/js'
+  --exclude='rails/public/packs/media'
+  --exclude='rails/app/javascript/fonts'
+  --exclude='rails/app/javascript/mastodon'
+  --exclude='bundle/ruby/*/cache/*.gem'
+  --exclude='bundle/ruby/*/cache/bundler'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ext'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ports'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/lib/nokogiri/jruby'
+  --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/test'
   -C #{DEST_DIR}
   .
 ].map { "'#{_1}'" }.join(" "))
