@@ -41,8 +41,9 @@ module Sidekiq
   end
 end
 
+require "bundler"
 measure("bundler/setup") do
-  require "bundler/setup"
+  Bundler.setup(:web)
 end
 
 measure("prerequisites gems") do

@@ -177,13 +177,12 @@ group :development do
   gem 'i18n-tasks', '~> 1.0', require: false
 end
 
-# Generate fake data values
-gem 'faker', '~> 3.2', group: [:development, :test, :web]
-
 group :development, :test do
   # Interactive Debugging tools
   gem 'debug', '~> 1.8'
 
+  # Generate fake data values
+  gem 'faker', '~> 3.2'
 
   # Generate factory objects
   gem 'fabrication', '~> 2.30'
@@ -197,7 +196,7 @@ group :development, :test do
   # RSpec runner for rails
   gem 'rspec-rails', '~> 6.0'
 
-  unless RUBY_PLATFORM =~ /wasm/
+  install_if -> { !(RUBY_PLATFORM =~ /wasm/) } do
     gem 'ruby_wasm', git: 'https://github.com/ruby/ruby.wasm', ref: "576cc3f6d838b0f942e045dd88fb295347d2291c"
   end
 end
