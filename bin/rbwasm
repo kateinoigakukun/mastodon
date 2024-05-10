@@ -121,9 +121,6 @@ RUBY
     ]
   ],
   ["websocket-driver", "0.7.6"],
-  ["racc", "1.7.3"],
-  ["bigdecimal", "3.1.7"],
-  ["bcrypt", "3.1.20"],
 ].each do |gem_name, version, files|
   spec = Gem::Specification.new do |s|
     s.name = gem_name
@@ -207,23 +204,6 @@ SECRET_KEY_BASE=a4e798c5119316eecd8152a27b249d7c8dd3b5f91de4b1c17cb3aa4dded992d4
 OTP_SECRET=d6ded6df389090f80be7569a6a660911d6eb43dae31833f436ab2c372a97ce0c18758fcba08ee1f96d4d60e77600f9705cc3e81a594c793e417b59a71e882f69
 VAPID_PRIVATE_KEY=LsPOYsXyZhOylr7LjXERLSLCu077ViOWAOBlEgYVmeo=
 VAPID_PUBLIC_KEY=BNuQei3AJ2IChENzjREilbluz0k1CYNZgqlGaupOLlzZ6Wi5CX4Ei7T0Ndl5Sq62FXDpEDSzPCTPPkQSfekLawA=
-DB_HOST=/var/run/postgresql
-DB_PORT=5432
-DB_NAME=mastodon_production
-DB_USER=mastodon
-DB_PASS=
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-SMTP_SERVER=smtp.mailgun.org
-SMTP_PORT=587
-SMTP_LOGIN=
-SMTP_PASSWORD=
-SMTP_AUTH_METHOD=plain
-SMTP_OPENSSL_VERIFY_MODE=none
-SMTP_ENABLE_STARTTLS=auto
-SMTP_FROM_ADDRESS='Mastodon <notifications@localhost>'
-UPDATE_CHECK_URL=
 ENV
 FileUtils.cp("app.json", "#{DEST_DIR}/rails/app.json")
 FileUtils.cp("config.ru", "#{DEST_DIR}/rails/config.ru")
@@ -231,6 +211,8 @@ FileUtils.cp("config.ru", "#{DEST_DIR}/rails/config.ru")
 system(%W[
   tar cfz pwa/dist/fs.tar.gz
   --exclude='**/.git/**/*'
+  --exclude='rails/public/emoji'
+  --exclude='rails/public/ocr'
   --exclude='bundle/ruby/*/cache/**/*'
   --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ext/**/*'
   --exclude='bundle/ruby/*/bundler/gems/nokogiri-*/ports/**/*'
@@ -244,36 +226,5 @@ File.write("pwa/dist/fs.meta.json", JSON.dump({
 }))
 system("rsync -a public/ pwa/dist/rails/public/")
 
-# # Validation test
-# runruby(["-r", "bundler/setup", "-e", 'require "rails"'])
-
-File.write("tmp/main.rb", <<~RUBY)
-require "/bundle/setup"
-
-ENV["ACTIVE_RECORD_ADAPTER"] = "nulldb"
-ENV["DB_POOL"] = "1"
-ENV["RAILS_ENV"] = "production"
-
-# IRB.conf[:USE_SINGLELINE] = false
-# IRB.conf[:USE_MULTILINE] = false
-
-class Thread
-  def self.new(...)
-    f = Fiber.new(...)
-    def f.value = resume
-    f
-  end
-end
-
-require "/rails/config/environment"
-
-request = Rack::MockRequest.env_for("http://localhost:3000", {"HTTP_HOST" => "localhost"})
-puts Rails.application.call(request)
-
-request = Rack::MockRequest.env_for("http://localhost:3000/health", {"HTTP_HOST" => "localhost"})
-puts Rails.application.call(request)
-RUBY
-
-# runruby(["/rails/tmp/main.rb"])
-
 system("#{JCO_SOURCE}/src/jco.js transpile --instantiation --valid-lifting-optimization #{RUBY_BIN} -o pwa/dist/component")
+Dir.chdir("pwa") { system("node ./build.mjs") }

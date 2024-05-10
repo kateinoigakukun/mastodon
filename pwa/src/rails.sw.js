@@ -63,7 +63,18 @@ function teeDownloadProgress(response, progress) {
     }));
 }
 
-async function _fetchFileData(progress) {
+function memoize(body) {
+    let result = null
+    const fn = (...args) => {
+        if (result === null) {
+            result = body(...args)
+        }
+        return result
+    }
+    return { fn, reset: () => { result = null } }
+}
+
+const { fn: fetchFileData } = memoize(async (progress) => {
     progress.updateStep("Fetching fs.tar.gz")
     const rawTarballResponse = await fetch("/fs.tar.gz")
     const tarballResponse = teeDownloadProgress(rawTarballResponse, (downloaded) => {
@@ -132,23 +143,17 @@ async function _fetchFileData(progress) {
     }
 
     await Promise.all(dataWorks)
+    const home = "/home/me"
+    mkdir_p(home)
 
-    return root
-}
-let fetchFileDataTask = null
-async function fetchFileData(progress) {
-    if (fetchFileDataTask) {
-        return fetchFileDataTask
-    }
-    fetchFileDataTask = _fetchFileData(progress)
-    return fetchFileDataTask
-}
+    return { root, home }
+});
 
 async function instantiateRuby(args, progress) {
     const vmOptions = { args: args }
     const vm = await RubyVM._instantiate(async (jsRuntime) => {
         const { cli, clocks, filesystem, io, random, sockets } = preview2Shim;
-        const root = await fetchFileData(progress)
+        const { root, home } = await fetchFileData(progress)
 
         progress.updateStep("Initializing Ruby VM")
 
@@ -159,7 +164,7 @@ async function instantiateRuby(args, progress) {
             BUNDLE_ONLY: "web",
             BUNDLE_PATH: "/bundle",
             BUNDLE_GEMFILE: "/rails/Gemfile",
-            HOME: "/home/me",
+            HOME: home,
             RAILS_ENV: "production",
             RAILS_WEB: "1",
         })
@@ -205,7 +210,7 @@ async function initPGlite(progress) {
     return pglite
 }
 
-async function _initRails(progress) {
+const { fn: initRails, reset: resetRails } = memoize(async (progress) => {
     self.PGLite4Rails = await initPGlite(progress)
 
     const vm = await instantiateRuby(["ruby", "-e", "_=0"], progress)
@@ -221,21 +226,12 @@ $LOAD_PATH.unshift "/bundle/ruby/3.4.0+0/extensions/wasm32-wasi/3.4.0+0-static/b
     await vm.evalAsync(script)
     progress.updateProgress(100)
     return vm;
-}
-
-let initRailsTask = null
-async function initRails(progress) {
-    if (initRailsTask) {
-        return initRailsTask
-    }
-    initRailsTask = _initRails(progress)
-    return initRailsTask
-}
+})
 
 const bootProgress = new BootProgress();
 
 self.railsRestart = async () => {
-    initRailsTask = null
+    resetRails()
     await initRails(bootProgress)
 }
 
