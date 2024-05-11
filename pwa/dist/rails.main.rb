@@ -13,7 +13,7 @@ ENV["ACTIVE_RECORD_ADAPTER"] = "pglite"
 # ENV["ACTIVE_RECORD_ADAPTER"] = "nulldb"
 ENV["DB_POOL"] = "1"
 ENV["RAILS_ENV"] = "production"
-ENV["RAILS_LOG_LEVEL"] = "debug"
+# ENV["RAILS_LOG_LEVEL"] = "debug"
 ENV["RAILS_WEB"] = "1"
 
 class Thread
@@ -136,7 +136,7 @@ end
 measure("/rails/config/environment") do
   require "/rails/config/environment"
 end
-Rails.autoloaders.log!
+Rails.autoloaders.log! if ENV["RAILS_ENV"] == "development"
 
 class Status
   # HACK: PGlite does not support "insert_returning", so we need to assign id
