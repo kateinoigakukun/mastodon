@@ -1,3 +1,11 @@
+# mastodon.wasm
+
+PoC: Run Mastodon *server* on browser.
+
+https://github.com/user-attachments/assets/92f806bb-2d3d-429d-aae1-d8e1031a50fb
+
+
+
 <h1><picture>
   <source media="(prefers-color-scheme: dark)" srcset="./lib/assets/wordmark.dark.png?raw=true">
   <source media="(prefers-color-scheme: light)" srcset="./lib/assets/wordmark.light.png?raw=true">
